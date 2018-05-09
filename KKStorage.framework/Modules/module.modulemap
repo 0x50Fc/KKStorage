@@ -1,0 +1,6 @@
+framework module KKStorage {
+  umbrella header "KKStorage.h"
+
+  export *
+  module * { export * }
+}

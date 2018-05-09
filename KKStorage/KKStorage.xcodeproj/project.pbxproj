@@ -6,6 +6,21 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		1A4F849020A2ABEC007ED70E /* KKStorage.framework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1A4F849320A2ABEC007ED70E /* Build configuration list for PBXAggregateTarget "KKStorage.framework" */;
+			buildPhases = (
+				1A4F849420A2ABF9007ED70E /* ShellScript */,
+			);
+			dependencies = (
+				1A4F849620A2AC0C007ED70E /* PBXTargetDependency */,
+			);
+			name = KKStorage.framework;
+			productName = KKStorage.framework;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		1A195649207DACAE001C9B0B /* KKStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A195647207DACAE001C9B0B /* KKStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1A195650207DAD3B001C9B0B /* KKStorageProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A19564F207DAD3B001C9B0B /* KKStorageProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -18,6 +33,16 @@
 		1A195668207DC2CE001C9B0B /* KKSqlite.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A195666207DC2CE001C9B0B /* KKSqlite.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1A195669207DC2CE001C9B0B /* KKSqlite.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A195667207DC2CE001C9B0B /* KKSqlite.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1A4F849520A2AC0C007ED70E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A19563B207DACAE001C9B0B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A195643207DACAE001C9B0B;
+			remoteInfo = KKStorage;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		1A195644207DACAE001C9B0B /* KKStorage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KKStorage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,6 +153,9 @@
 					1A195643207DACAE001C9B0B = {
 						CreatedOnToolsVersion = 9.3;
 					};
+					1A4F849020A2ABEC007ED70E = {
+						CreatedOnToolsVersion = 9.3;
+					};
 				};
 			};
 			buildConfigurationList = 1A19563E207DACAE001C9B0B /* Build configuration list for PBXProject "KKStorage" */;
@@ -143,6 +171,7 @@
 			projectRoot = "";
 			targets = (
 				1A195643207DACAE001C9B0B /* KKStorage */,
+				1A4F849020A2ABEC007ED70E /* KKStorage.framework */,
 			);
 		};
 /* End PBXProject section */
@@ -157,6 +186,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		1A4F849420A2ABF9007ED70E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\nFMK_NAME=${PROJECT_NAME}\n\nINSTALL_DIR=${SRCROOT}/../${FMK_NAME}.framework\n\nWRK_DIR=build\n\nDEVICE_DIR=${WRK_DIR}/Release-iphoneos/${FMK_NAME}.framework\n\nSIMULATOR_DIR=${WRK_DIR}/Release-iphonesimulator/${FMK_NAME}.framework\n\nxcodebuild -configuration \"Release\" -target \"${FMK_NAME}\" -sdk iphoneos clean build\n\nxcodebuild -configuration \"Release\" -target \"${FMK_NAME}\" -sdk iphonesimulator clean build\n\nif [ -d \"${INSTALL_DIR}\" ]\n\nthen\n\nrm -rf \"${INSTALL_DIR}\"\n\nfi\n\nmkdir -p \"${INSTALL_DIR}\"\n\ncp -R \"${DEVICE_DIR}/\" \"${INSTALL_DIR}/\"\n\nlipo -create \"${DEVICE_DIR}/${FMK_NAME}\" \"${SIMULATOR_DIR}/${FMK_NAME}\" -output \"${INSTALL_DIR}/${FMK_NAME}\"\n\nrm -r \"${WRK_DIR}\"\n\nopen \"${INSTALL_DIR}\"\n\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1A19563F207DACAE001C9B0B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -170,6 +215,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1A4F849620A2AC0C007ED70E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A195643207DACAE001C9B0B /* KKStorage */;
+			targetProxy = 1A4F849520A2AC0C007ED70E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1A19564A207DACAE001C9B0B /* Debug */ = {
@@ -327,6 +380,24 @@
 			};
 			name = Release;
 		};
+		1A4F849120A2ABEC007ED70E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8V7A9F9SCJ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1A4F849220A2ABEC007ED70E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8V7A9F9SCJ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -344,6 +415,15 @@
 			buildConfigurations = (
 				1A19564D207DACAE001C9B0B /* Debug */,
 				1A19564E207DACAE001C9B0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A4F849320A2ABEC007ED70E /* Build configuration list for PBXAggregateTarget "KKStorage.framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A4F849120A2ABEC007ED70E /* Debug */,
+				1A4F849220A2ABEC007ED70E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
