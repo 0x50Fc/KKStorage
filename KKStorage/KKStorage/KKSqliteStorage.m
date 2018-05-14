@@ -34,7 +34,7 @@
             
             char * errmsg = NULL;
             
-            if(SQLITE_OK != sqlite3_exec(db,[[NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS [%@](key VARCHAR(4096) PRIMARY KEY , value TEXT)",name] UTF8String],NULL,NULL,&errmsg)) {
+            if(SQLITE_OK != sqlite3_exec(db,[[NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS [_%@](key VARCHAR(4096) PRIMARY KEY , value TEXT)",name] UTF8String],NULL,NULL,&errmsg)) {
                 NSLog(@"[KK] %s", errmsg);
             }
             
@@ -59,18 +59,20 @@
         
         sqlite3_stmt * stmt;
         
-        if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"SELECT value FROM [%@] WHERE key=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
+        if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"SELECT value FROM [_%@] WHERE key=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
             NSLog(@"[KK] %s", sqlite3_errmsg(db));
             return;
         }
         
+        sqlite3_bind_text(stmt,1, [key UTF8String],-1,SQLITE_STATIC);
+        
         if(sqlite3_step(stmt) == SQLITE_ROW) {
             
-            char * text = (char *) sqlite3_column_text(stmt,1);
+            char * text = (char *) sqlite3_column_text(stmt,0);
             
             if(text != NULL){
-                NSData * data = [NSData dataWithBytesNoCopy:text length:strlen(text)];
-                v = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+                NSData * data = [NSData dataWithBytesNoCopy:text length:strlen(text) freeWhenDone:NO];
+                v = [KKSqliteStorage decodeValue:data];
             }
         }
         
@@ -96,7 +98,7 @@
         
         sqlite3_stmt * stmt;
         
-        if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"SELECT key FROM [%@] WHERE key=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
+        if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"SELECT key FROM [_%@] WHERE key=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
             NSLog(@"[KK] %s", sqlite3_errmsg(db));
             return;
         }
@@ -111,12 +113,12 @@
         
         if(hasKey) {
             
-            if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"UPDATE [%@] SET value=@value WHERE key=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
+            if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"UPDATE [_%@] SET [value]=@value WHERE [key]=@key",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
                 NSLog(@"[KK] %s", sqlite3_errmsg(db));
                 return;
             }
             
-            NSData * data = [NSJSONSerialization dataWithJSONObject:value options:NSJSONWritingPrettyPrinted error:nil];
+            NSData * data = [KKSqliteStorage encodeValue:value];
             
             sqlite3_bind_text(stmt,1, [data bytes], (int) [data length] ,SQLITE_STATIC);
             
@@ -132,14 +134,14 @@
             
         } else {
             
-            if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"INSERT [%@](key,value) VALUES (@key,@value) ",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
+            if(sqlite3_prepare_v2(db, [[NSString stringWithFormat:@"INSERT INTO [_%@]([key],[value]) VALUES (@key,@value) ",name] UTF8String], -1, &stmt, NULL) != SQLITE_OK){
                 NSLog(@"[KK] %s", sqlite3_errmsg(db));
                 return;
             }
             
             sqlite3_bind_text(stmt,1, [key UTF8String],-1,SQLITE_STATIC);
             
-            NSData * data = [NSJSONSerialization dataWithJSONObject:value options:NSJSONWritingPrettyPrinted error:nil];
+            NSData * data = [KKSqliteStorage encodeValue:value];
             
             sqlite3_bind_text(stmt,2, [data bytes], (int) [data length] ,SQLITE_STATIC);
             
@@ -156,6 +158,36 @@
         
     });
     
+}
+
++(NSData *) encodeValue:(id) value {
+    
+    if([value isKindOfClass:[NSNumber class]]) {
+        return [[value stringValue] dataUsingEncoding:NSUTF8StringEncoding];
+    } else if([value isKindOfClass:[NSString class]]) {
+        return [value dataUsingEncoding:NSUTF8StringEncoding];
+    } else {
+        @try {
+            return [NSJSONSerialization dataWithJSONObject:value options:NSJSONWritingPrettyPrinted error:nil];
+        }
+        @catch(NSException * ex) {
+            return [[value description] dataUsingEncoding:NSUTF8StringEncoding];
+        }
+    }
+    
+    return nil;
+}
+
++(id) decodeValue:(NSData *) data {
+    if([data length] > 0) {
+        char * p = (char *) [data bytes];
+        if(*p == '{' || *p == '[') {
+            return [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+        } else  {
+            return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        }
+    }
+    return nil;
 }
 
 @end
